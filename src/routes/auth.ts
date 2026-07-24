@@ -1,8 +1,27 @@
 import { Router } from "express";
 import { z } from "zod";
+import rateLimit from "express-rate-limit";
 import { crearClienteAnonimo, supabase } from "../services/supabaseClient.js";
 
 export const authRouter = Router();
+
+// Sin límite, cualquiera podría probar contraseñas por fuerza bruta contra
+// un email conocido, o bombardear a un usuario con emails de recuperación.
+const limitadorLogin = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Demasiados intentos. Inténtalo de nuevo en unos minutos." },
+});
+
+const limitadorRecuperacion = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Demasiadas solicitudes. Inténtalo de nuevo en unos minutos." },
+});
 
 const esquemaLogin = z.object({
   email: z.string().email(),
@@ -12,7 +31,7 @@ const esquemaLogin = z.object({
 // El navegador nunca habla directamente con Supabase (evita tener que abrir
 // la política de seguridad a dominios externos): el backend hace de
 // intermediario del login y devuelve el token de sesión al frontend.
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", limitadorLogin, async (req, res) => {
   const parseo = esquemaLogin.safeParse(req.body);
   if (!parseo.success) return res.status(400).json({ error: parseo.error.flatten() });
 
@@ -36,7 +55,7 @@ const esquemaSolicitud = z.object({ email: z.string().email() });
 
 // Envía el email de recuperación (lo gestiona Supabase Auth). Responde igual
 // exista o no el email, para no revelar qué correos tienen cuenta.
-authRouter.post("/solicitar-recuperacion", async (req, res) => {
+authRouter.post("/solicitar-recuperacion", limitadorRecuperacion, async (req, res) => {
   const parseo = esquemaSolicitud.safeParse(req.body);
   if (!parseo.success) return res.status(400).json({ error: parseo.error.flatten() });
 

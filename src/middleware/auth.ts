@@ -86,7 +86,7 @@ export async function requiereClientUser(req: Request, res: Response, next: Next
 
   const { data: empresa, error } = await supabase
     .from("empresas")
-    .select("nif_cif_nie")
+    .select("nif_cif_nie, activo")
     .eq("id", perfil.empresa_id)
     .single();
 
@@ -94,6 +94,13 @@ export async function requiereClientUser(req: Request, res: Response, next: Next
     return res
       .status(403)
       .json({ error: "El NIF de tu usuario no coincide con el de la empresa vinculada. Contacta con soporte." });
+  }
+
+  // La baja lógica (empresas.activo=false) debe cortar también el acceso al
+  // portal, no solo dejar de facturar — si no, un cliente dado de baja
+  // sigue viendo y gestionando sus datos con normalidad.
+  if (!empresa.activo) {
+    return res.status(403).json({ error: "Esta cuenta está dada de baja. Contacta con soporte." });
   }
 
   req.perfil = perfil;

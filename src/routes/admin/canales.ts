@@ -4,6 +4,19 @@ import { supabase } from "../../services/supabaseClient.js";
 
 export const canalesAdminRouter = Router();
 
+// El access_token de WhatsApp/Instagram nunca debe llegar al navegador una
+// vez guardado (quien abra las devtools o vea el HTML lo vería en claro):
+// se sustituye por un booleano para que la pantalla sepa que ya hay uno
+// configurado, sin exponer el valor real.
+function ocultarTokenAcceso<T extends { detalles?: unknown }>(fila: T): T {
+  const detalles = fila.detalles as Record<string, unknown> | null | undefined;
+  if (!detalles || typeof detalles !== "object" || !("access_token" in detalles)) {
+    return fila;
+  }
+  const { access_token, ...resto } = detalles;
+  return { ...fila, detalles: { ...resto, access_token_configurado: Boolean(access_token) } };
+}
+
 canalesAdminRouter.get("/", async (_req, res) => {
   const { data, error } = await supabase
     .from("empresa_canales")
@@ -11,7 +24,7 @@ canalesAdminRouter.get("/", async (_req, res) => {
     .order("ultima_actividad", { ascending: false });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  res.json((data ?? []).map(ocultarTokenAcceso));
 });
 
 canalesAdminRouter.get("/:empresaId", async (req, res) => {
@@ -21,7 +34,7 @@ canalesAdminRouter.get("/:empresaId", async (req, res) => {
     .eq("empresa_id", req.params.empresaId);
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  res.json((data ?? []).map(ocultarTokenAcceso));
 });
 
 const CANALES = [
@@ -49,6 +62,22 @@ canalesAdminRouter.put("/:empresaId", async (req, res) => {
 
   const { canal, activo, detalles } = parseo.data;
 
+  // Como el access_token ya no se manda de vuelta al navegador (ver
+  // ocultarTokenAcceso), el campo llega vacío en el formulario salvo que el
+  // admin escriba uno nuevo. Un valor vacío se interpreta como "no tocar
+  // este campo", fusionando con lo ya guardado en vez de sobreescribirlo.
+  const { data: existente } = await supabase
+    .from("empresa_canales")
+    .select("detalles")
+    .eq("empresa_id", req.params.empresaId)
+    .eq("canal", canal)
+    .maybeSingle();
+
+  const detallesFusionados: Record<string, unknown> = { ...((existente?.detalles as Record<string, unknown>) ?? {}) };
+  for (const [clave, valor] of Object.entries(detalles)) {
+    if (valor !== "") detallesFusionados[clave] = valor;
+  }
+
   const { data, error } = await supabase
     .from("empresa_canales")
     .upsert(
@@ -56,7 +85,7 @@ canalesAdminRouter.put("/:empresaId", async (req, res) => {
         empresa_id: req.params.empresaId,
         canal,
         estado_conexion: activo ? "conectado" : "desconectado",
-        detalles,
+        detalles: detallesFusionados,
       },
       { onConflict: "empresa_id,canal" }
     )
@@ -64,7 +93,7 @@ canalesAdminRouter.put("/:empresaId", async (req, res) => {
     .single();
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  res.json(ocultarTokenAcceso(data));
 });
 
 const esquemaPausa = z.object({

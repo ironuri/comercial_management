@@ -21,7 +21,7 @@ export async function notificarComercial(
 ) {
   const { data: empresa, error } = await supabase
     .from("empresas")
-    .select("nombre, canal_config")
+    .select("nombre, canal_config, email_contacto, email_facturacion")
     .eq("id", empresaId)
     .single();
 
@@ -29,12 +29,18 @@ export async function notificarComercial(
     throw new Error(`No se pudo cargar la empresa para notificar: ${error?.message}`);
   }
 
-  const emailDestino = (empresa.canal_config as { email_notificacion?: string })
-    ?.email_notificacion;
+  // El email pensado para esto es email_notificacion, pero si no se ha
+  // rellenado (fácil de olvidar en el alta) no tiene sentido dejar al
+  // cliente sin ningún aviso de sus leads: se prueban también el email de
+  // contacto y el de facturación antes de renunciar del todo.
+  const emailDestino =
+    (empresa.canal_config as { email_notificacion?: string })?.email_notificacion ||
+    empresa.email_contacto ||
+    empresa.email_facturacion;
 
   if (!emailDestino) {
     console.warn(
-      `Empresa ${empresaId} no tiene email_notificacion configurado en canal_config; no se notifica.`
+      `Empresa ${empresaId} no tiene ningún email configurado (notificación/contacto/facturación); no se notifica.`
     );
     return;
   }

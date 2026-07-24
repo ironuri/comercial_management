@@ -31,6 +31,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+// Detrás de un proxy/balanceador (Render, Fly, nginx...) Express ve la IP
+// del proxy en vez de la del cliente real si no se activa esto — y con eso,
+// express-rate-limit (login, demo, ingesta) trata a todos los clientes como
+// una sola IP, dejando el límite inservible en producción.
+app.set("trust proxy", 1);
+
 // Cabeceras de seguridad básicas. CSP permite scripts/estilos inline porque
 // la web actual los usa directamente en los .html; si en el futuro se separan
 // a ficheros .js/.css propios, se puede endurecer quitando 'unsafe-inline'.
@@ -52,11 +58,20 @@ app.use(
     },
   })
 );
-app.use(express.json());
+// Guarda el cuerpo crudo de la petición: el webhook de WhatsApp necesita los
+// bytes exactos (no el JSON re-serializado) para verificar la firma
+// X-Hub-Signature-256 que envía Meta.
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+    },
+  })
+);
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use("/api/ingesta", ingestaRouter);
-app.use("/api/revision", revisionRouter);
+app.use("/api/revision", requiereInterno, revisionRouter);
 app.use("/api/demo", demoRouter);
 app.use("/api/webhooks/whatsapp", webhookWhatsappRouter);
 app.use("/api/admin/empresas", requiereInterno, empresasAdminRouter);

@@ -110,7 +110,7 @@ async function procesarMensajeEntranteInterno(
   ]);
   const botPausado = (canalConfig?.pausado ?? false) || Boolean(contactoPausado);
 
-  const { data: mensajeCliente } = await supabase
+  const { data: mensajeCliente, error: errorMensajeCliente } = await supabase
     .from("mensajes")
     .insert({
       conversacion_id: conversacion.id,
@@ -120,6 +120,10 @@ async function procesarMensajeEntranteInterno(
     })
     .select()
     .single();
+
+  if (errorMensajeCliente) {
+    throw new Error(`No se pudo guardar el mensaje del cliente: ${errorMensajeCliente.message}`);
+  }
 
   const { intencion, uso: usoClasificacion } = await clasificarIntencion(mensaje.texto);
   await registrarConsumo(mensaje.empresaId, mensajeCliente?.id ?? null, usoClasificacion);
@@ -138,7 +142,7 @@ async function procesarMensajeEntranteInterno(
   if (intencion === "informativa") {
     actualizarEtapaActividad(idActividad, "respondiendo");
     const { respuesta, uso } = await generarRespuestaInformativa(promptSistema, mensaje.texto);
-    const { data: mensajeIa } = await supabase
+    const { data: mensajeIa, error: errorMensajeIa } = await supabase
       .from("mensajes")
       .insert({
         conversacion_id: conversacion.id,
@@ -152,7 +156,12 @@ async function procesarMensajeEntranteInterno(
       })
       .select()
       .single();
-    await registrarConsumo(mensaje.empresaId, mensajeIa?.id ?? null, uso);
+
+    if (errorMensajeIa) {
+      throw new Error(`No se pudo guardar la respuesta informativa: ${errorMensajeIa.message}`);
+    }
+
+    await registrarConsumo(mensaje.empresaId, mensajeIa.id, uso);
     return { conversacionId: conversacion.id, intencion, lead: null, respuesta, botPausado };
   }
 
@@ -178,7 +187,7 @@ async function procesarMensajeEntranteInterno(
     throw new Error(`No se pudo guardar el lead: ${errorLead.message}`);
   }
 
-  const { data: mensajeIa } = await supabase
+  const { data: mensajeIa, error: errorMensajeIa } = await supabase
     .from("mensajes")
     .insert({
       conversacion_id: conversacion.id,
@@ -189,7 +198,12 @@ async function procesarMensajeEntranteInterno(
     })
     .select()
     .single();
-  await registrarConsumo(mensaje.empresaId, mensajeIa?.id ?? null, usoCualificacion);
+
+  if (errorMensajeIa) {
+    throw new Error(`No se pudo guardar la respuesta sugerida: ${errorMensajeIa.message}`);
+  }
+
+  await registrarConsumo(mensaje.empresaId, mensajeIa.id, usoCualificacion);
 
   if (requiereNotificacion(lead, ficha.requiereEscaladoHumano)) {
     actualizarEtapaActividad(idActividad, "notificando");

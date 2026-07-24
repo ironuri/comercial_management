@@ -122,12 +122,12 @@
       <a class="enlace-nav" data-vista="clientes" onclick="irA('clientes')">Listado de clientes</a>
       <a class="enlace-nav" data-vista="servicios" onclick="irA('servicios')">Servicios</a>
       <a class="enlace-nav" data-vista="nuevo-cliente" onclick="irA('nuevo-cliente')">Nuevo cliente</a>
-      <a class="enlace-nav" data-vista="productos" onclick="irA('productos')">Productos</a>
+      <a class="enlace-nav" data-vista="productos" onclick="irA('productos')">Paquetes</a>
       <a class="enlace-nav" data-vista="facturacion" onclick="irA('facturacion')">Facturación</a>
 
       <div class="titulo-grupo">Consultas</div>
       <a class="enlace-nav" data-vista="consultas" onclick="irA('consultas')">Consultas Generales</a>
-      <a class="enlace-nav" data-vista="actividad" onclick="irA('actividad')">Actividad de los agentes</a>
+      <a class="enlace-nav" data-vista="actividad" onclick="irA('actividad')">Actividad del bot en vivo</a>
       <a class="enlace-nav" data-vista="ficha-gestion" onclick="irA('ficha-gestion')">Ficha de Gestión</a>
 
       <div class="titulo-grupo">Mantenimiento</div>
@@ -135,7 +135,7 @@
 
       <div class="titulo-grupo">Estadísticas</div>
       <a class="enlace-nav" data-vista="dashboard" onclick="irA('dashboard')">Dashboard</a>
-      <a class="enlace-nav" data-vista="extracciones" onclick="irA('extracciones')">Extracciones</a>
+      <a class="enlace-nav" data-vista="extracciones" onclick="irA('extracciones')">Exportar datos</a>
     </nav>
 
     <button class="salir-btn" onclick="salir()">Salir</button>
@@ -267,7 +267,7 @@
   function renderActividad() {
     const contenido = document.getElementById('contenido');
     contenido.innerHTML = `
-      <h2>Actividad de los agentes</h2>
+      <h2>Actividad del bot en vivo</h2>
       <p style="color:var(--gris); font-size:0.9rem; margin-top:-0.5rem;">
         Qué está procesando el motor de IA ahora mismo, y el volumen de consultas gestionadas recientemente.
       </p>
@@ -1074,7 +1074,7 @@
                 <p style="font-size:0.78rem; color:var(--gris); margin:0.5rem 0 0;">
                   Indica a su desarrollador que cada envío del formulario se mande a:<br>
                   <code>POST ${window.location.origin}/api/ingesta</code><br>
-                  con el cuerpo: <code>{ "empresaId": "${empresa.id}", "canal": "formulario", "remitenteContacto": "...", "texto": "..." }</code>
+                  con el cuerpo: <code>{ "empresaId": "${empresa.id}", "token": "${empresa.token_ingesta}", "canal": "formulario", "remitenteContacto": "...", "texto": "..." }</code>
                 </p>
                 ${filaPausa('formulario', canalFormulario)}
               </td>
@@ -1091,7 +1091,7 @@
                 <label style="font-size:0.8rem; margin-top:0.4rem;">WhatsApp Business Account ID (WABA)</label>
                 <input id="form-waba-id-whatsapp_independiente" placeholder="1720165655798140" value="${canalWhatsappIndependiente.detalles?.waba_id ?? ''}" />
                 <label style="font-size:0.8rem; margin-top:0.4rem;">Access Token</label>
-                <input id="form-access-token-whatsapp_independiente" type="password" placeholder="EAAxxxxxxx..." value="${canalWhatsappIndependiente.detalles?.access_token ?? ''}" />
+                <input id="form-access-token-whatsapp_independiente" type="password" placeholder="${canalWhatsappIndependiente.detalles?.access_token_configurado ? '•••• ya configurado (déjalo en blanco para no cambiarlo)' : 'EAAxxxxxxx...'}" />
                 ${filaPausa('whatsapp_independiente', canalWhatsappIndependiente)}
               </td>
               <td style="vertical-align:top;"><button class="secundario" onclick="guardarCanalServicio('${empresa.id}', 'whatsapp_independiente')">Guardar</button></td>
@@ -1107,7 +1107,7 @@
                 <label style="font-size:0.8rem; margin-top:0.4rem;">WhatsApp Business Account ID (WABA)</label>
                 <input id="form-waba-id-whatsapp_coexistence" placeholder="1720165655798140" value="${canalWhatsappCoexistence.detalles?.waba_id ?? ''}" />
                 <label style="font-size:0.8rem; margin-top:0.4rem;">Access Token</label>
-                <input id="form-access-token-whatsapp_coexistence" type="password" placeholder="EAAxxxxxxx..." value="${canalWhatsappCoexistence.detalles?.access_token ?? ''}" />
+                <input id="form-access-token-whatsapp_coexistence" type="password" placeholder="${canalWhatsappCoexistence.detalles?.access_token_configurado ? '•••• ya configurado (déjalo en blanco para no cambiarlo)' : 'EAAxxxxxxx...'}" />
                 ${filaPausa('whatsapp_coexistence', canalWhatsappCoexistence)}
               </td>
               <td style="vertical-align:top;"><button class="secundario" onclick="guardarCanalServicio('${empresa.id}', 'whatsapp_coexistence')">Guardar</button></td>
@@ -1120,7 +1120,7 @@
               <td>
                 <label style="font-size:0.8rem;">Email de la bandeja a monitorizar</label>
                 <input id="form-email-bandeja-email_funcional" placeholder="ventas@clienteweb.com" value="${canalEmailFuncional.detalles?.email_bandeja ?? ''}" />
-                <p style="font-size:0.78rem; color:var(--gris); margin:0.5rem 0 0;">La conexión real (IMAP/reenvío automático a esta bandeja) es un desarrollo técnico pendiente; de momento el canal ya acepta leads vía <code>POST /api/ingesta</code> con <code>"canal": "email_funcional"</code>.</p>
+                <p style="font-size:0.78rem; color:var(--gris); margin:0.5rem 0 0;">La conexión real (IMAP/reenvío automático a esta bandeja) es un desarrollo técnico pendiente; de momento el canal ya acepta leads vía <code>POST /api/ingesta</code> con <code>"canal": "email_funcional"</code> y <code>"token": "${empresa.token_ingesta}"</code>.</p>
                 ${filaPausa('email_funcional', canalEmailFuncional)}
               </td>
               <td style="vertical-align:top;"><button class="secundario" onclick="guardarCanalServicio('${empresa.id}', 'email_funcional')">Guardar</button></td>
@@ -1134,7 +1134,7 @@
                 <label style="font-size:0.8rem;">Instagram Business Account ID</label>
                 <input id="form-ig-account-id-instagram_chat" placeholder="1789..." value="${canalInstagramChat.detalles?.instagram_account_id ?? ''}" />
                 <label style="font-size:0.8rem; margin-top:0.4rem;">Access Token</label>
-                <input id="form-access-token-instagram_chat" type="password" placeholder="EAAxxxxxxx..." value="${canalInstagramChat.detalles?.access_token ?? ''}" />
+                <input id="form-access-token-instagram_chat" type="password" placeholder="${canalInstagramChat.detalles?.access_token_configurado ? '•••• ya configurado (déjalo en blanco para no cambiarlo)' : 'EAAxxxxxxx...'}" />
                 ${filaPausa('instagram_chat', canalInstagramChat)}
               </td>
               <td style="vertical-align:top;"><button class="secundario" onclick="guardarCanalServicio('${empresa.id}', 'instagram_chat')">Guardar</button></td>
@@ -1147,7 +1147,7 @@
               <td>
                 <label style="font-size:0.8rem;">URL de la web donde se embebe el widget (referencia)</label>
                 <input id="form-url-widget-chat_web" placeholder="https://clienteweb.com" value="${canalChatWeb.detalles?.url_widget ?? ''}" />
-                <p style="font-size:0.78rem; color:var(--gris); margin:0.5rem 0 0;">El snippet de instalación del widget es un desarrollo técnico pendiente; de momento el canal ya acepta leads vía <code>POST /api/ingesta</code> con <code>"canal": "chat_web"</code>.</p>
+                <p style="font-size:0.78rem; color:var(--gris); margin:0.5rem 0 0;">El snippet de instalación del widget es un desarrollo técnico pendiente; de momento el canal ya acepta leads vía <code>POST /api/ingesta</code> con <code>"canal": "chat_web"</code> y <code>"token": "${empresa.token_ingesta}"</code>.</p>
                 ${filaPausa('chat_web', canalChatWeb)}
               </td>
               <td style="vertical-align:top;"><button class="secundario" onclick="guardarCanalServicio('${empresa.id}', 'chat_web')">Guardar</button></td>
@@ -1565,7 +1565,7 @@
     const opciones = empresas.map((e) => `<option value="${e.id}">${e.nombre}</option>`).join('');
     const contenido = document.getElementById('contenido');
     contenido.innerHTML = `
-      <h2>Extracciones</h2>
+      <h2>Exportar datos</h2>
       <p style="color:var(--gris); font-size:0.9rem;">Descarga los leads en CSV, con filtros opcionales.</p>
       <div class="filtros">
         <select id="extraccion-empresa"><option value="">Todas las empresas</option>${opciones}</select>
@@ -1755,6 +1755,10 @@
           <p id="resumen-lead" style="margin-top:0.5rem; white-space:pre-wrap;">${l.resumen ?? ''}</p>
         </div>
 
+        <h4>Control del bot</h4>
+        <p style="font-size:0.85rem; color:var(--gris);">Quién lleva esta conversación: <strong>${l.pausado ? 'Un humano (bot en pausa)' : 'El bot (responde automáticamente)'}</strong></p>
+        <button class="${l.pausado ? 'principal' : 'secundario'}" onclick="pausarLeadAdmin('${conversacionId}', ${!l.pausado})">${l.pausado ? 'Reanudar bot' : 'Tomar el control'}</button>
+
         <h4>Resultado</h4>
         <div class="form-grid" style="max-width:600px;">
           <div>
@@ -1814,6 +1818,12 @@
     cargarLeads();
   }
 
+  async function pausarLeadAdmin(conversacionId, pausado) {
+    const resultado = await api(`/api/admin/leads/${conversacionId}/pausar`, { method: 'POST', body: JSON.stringify({ pausado }) });
+    if (resultado?.error) { alert(resultado.error); return; }
+    abrirDetalleLead(conversacionId);
+  }
+
   async function notificarClienteLead(conversacionId) {
     const datos = await api(`/api/admin/leads/${conversacionId}/notificar`, { method: 'POST' });
     if (datos.error) {
@@ -1828,7 +1838,7 @@
   async function renderProductos() {
     const contenido = document.getElementById('contenido');
     contenido.innerHTML = `
-      <h2>Productos</h2>
+      <h2>Paquetes</h2>
       <p style="color:var(--gris); font-size:0.9rem; margin-top:-0.5rem;">
         Paquetes estándar (Básico, Profesional, Premium...) que luego se asignan a cada cliente desde Servicios,
         con la posibilidad de personalizar el precio solo para ese cliente.

@@ -117,6 +117,29 @@ Sectores en los que ya trabajamos o estamos validando: alquiler de salas de even
 `.trim(),
 };
 
+// Prompt de arranque para un cliente recién dado de alta, del que solo se
+// conocen los datos básicos del formulario "Nuevo cliente" (todavía no hay
+// catálogo/FAQ ni reglas de escalado definidas). Sin esto, la ingesta de
+// mensajes fallaría con un error si alguien olvida configurar el prompt
+// real en Servicios antes de que lleguen las primeras consultas.
+export function construirPromptInicial(datos: {
+  nombre: string;
+  sector: string;
+  tono: string;
+  idioma: string;
+}): string {
+  return construirPromptSistema({
+    nombre: datos.nombre,
+    sector: datos.sector,
+    tono: datos.tono,
+    idioma: datos.idioma,
+    catalogoOFaq:
+      "(Pendiente de completar en Servicios → Prompt del proyecto. Mientras tanto, no inventes precios, horarios ni condiciones concretas: si el cliente pregunta por ellos, indica que un comercial se lo confirmará.)",
+    reglasEscalado:
+      "- Escalar a humano cualquier consulta con intención de compra real, ya que todavía no hay información suficiente cargada para responder con precisión.",
+  });
+}
+
 export function construirPromptSistema(config: ConfigEmpresa): string {
   return `
 Eres el asistente de atención comercial de "${config.nombre}", una empresa del sector: ${config.sector}.

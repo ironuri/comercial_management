@@ -2,15 +2,26 @@ import { Router } from "express";
 import { z } from "zod";
 import { supabase } from "../../services/supabaseClient.js";
 import { registrarEntradaGestion } from "../../services/gestionClientes.js";
+import { construirPromptInicial } from "../../prompts/plantillaBase.js";
 
 export const empresasAdminRouter = Router();
+
+// La sintaxis de .or() de PostgREST usa la coma para separar condiciones y
+// los paréntesis para agrupar — sin escapar, un término de búsqueda con
+// comas o paréntesis podía alterar los campos por los que se filtra. Se
+// envuelve el valor entre comillas dobles (como indica PostgREST) escapando
+// las comillas/barras invertidas que pudiera contener.
+function escaparValorPostgrest(valor: string): string {
+  const escapado = valor.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return `"${escapado}"`;
+}
 
 empresasAdminRouter.get("/", async (req, res) => {
   const { q } = req.query;
   let consulta = supabase.from("empresas").select("*").order("created_at", { ascending: false });
 
-  if (q) {
-    const texto = `%${q}%`;
+  if (q && typeof q === "string") {
+    const texto = escaparValorPostgrest(`%${q}%`);
     consulta = consulta.or(
       [
         `nombre.ilike.${texto}`,
@@ -98,6 +109,11 @@ empresasAdminRouter.post("/", async (req, res) => {
   // Repositorio de facturas y de gestión del cliente: Supabase Storage no
   // tiene carpetas reales (son solo prefijos de ruta), así que se sube un
   // marcador vacío para que la "carpeta" del cliente exista desde ya.
+  //
+  // También se crea un prompt de sistema inicial activo (placeholder, sin
+  // catálogo/FAQ todavía): sin esto, si se olvida configurar el prompt real
+  // en Servicios antes de la primera consulta, la ingesta falla con un 500
+  // en vez de responder con un mensaje genérico de "aún no tengo esa info".
   await Promise.all([
     supabase.storage.from("facturas-clientes").upload(`${data.id}/.keep`, new Blob([""]), {
       contentType: "text/plain",
@@ -106,6 +122,18 @@ empresasAdminRouter.post("/", async (req, res) => {
     supabase.storage.from("gestion-clientes").upload(`${data.id}/.keep`, new Blob([""]), {
       contentType: "text/plain",
       upsert: true,
+    }),
+    supabase.from("prompts_sistema").insert({
+      empresa_id: data.id,
+      version: 1,
+      contenido: construirPromptInicial({
+        nombre: data.nombre,
+        sector: data.sector,
+        tono: data.tono_comunicacion,
+        idioma: data.idioma_principal,
+      }),
+      entorno: "produccion",
+      activo: true,
     }),
   ]);
 

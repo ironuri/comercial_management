@@ -1,7 +1,23 @@
+import { z } from "zod";
 import { anthropic, MODELOS } from "./anthropicClient.js";
 import type { FichaLead } from "../types/lead.js";
 import type { UsoTokens } from "./clasificador.js";
 import type Anthropic from "@anthropic-ai/sdk";
+
+// El modelo devuelve la ficha vía tool_use, que llega tipado como `unknown`
+// en la práctica (Anthropic no valida el schema del lado del cliente) — sin
+// esto, una respuesta mal formada del modelo se volcaría tal cual en Supabase.
+const esquemaFichaLead = z.object({
+  nombreContacto: z.string().nullable().optional().default(null),
+  contacto: z.string().nullable().optional().default(null),
+  necesidad: z.string().nullable().optional().default(null),
+  presupuestoEstimado: z.string().nullable().optional().default(null),
+  urgencia: z.enum(["alta", "media", "baja"]).nullable().optional().default(null),
+  score: z.enum(["caliente", "templado", "frio"]),
+  requiereEscaladoHumano: z.boolean(),
+  motivoEscalado: z.string().nullable().optional().default(null),
+  respuestaSugerida: z.string(),
+});
 
 const HERRAMIENTA_FICHA_LEAD: Anthropic.Tool = {
   name: "registrar_ficha_lead",
@@ -49,8 +65,13 @@ export async function cualificarLead(
     throw new Error("El modelo no devolvió una ficha de lead estructurada");
   }
 
+  const parseo = esquemaFichaLead.safeParse(bloqueHerramienta.input);
+  if (!parseo.success) {
+    throw new Error(`Ficha de lead con forma inesperada: ${parseo.error.message}`);
+  }
+
   return {
-    ficha: bloqueHerramienta.input as FichaLead,
+    ficha: parseo.data as FichaLead,
     uso: {
       modelo: MODELOS.cualificador,
       tokensEntrada: respuesta.usage.input_tokens,

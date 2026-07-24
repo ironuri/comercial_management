@@ -124,7 +124,9 @@ usuariosAdminRouter.delete("/:id", async (req, res) => {
     return res.status(400).json({ error: "No puedes eliminar tu propio usuario" });
   }
 
-  await supabase.from("perfiles").delete().eq("id", req.params.id);
+  const { error: errorPerfil } = await supabase.from("perfiles").delete().eq("id", req.params.id);
+  if (errorPerfil) return res.status(500).json({ error: errorPerfil.message });
+
   const { error } = await supabase.auth.admin.deleteUser(req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });

@@ -22,9 +22,25 @@
   <div id="lista"></div>
 
   <script>
+    const token = localStorage.getItem('leadsift_token');
+    if (!token) window.location.href = '/login.html';
+
+    async function api(ruta, opciones = {}) {
+      const res = await fetch(ruta, {
+        ...opciones,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(opciones.headers || {}) },
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('leadsift_token');
+        window.location.href = '/login.html';
+        return null;
+      }
+      return res.json();
+    }
+
     async function cargar() {
-      const res = await fetch('/api/revision/pendientes');
-      const mensajes = await res.json();
+      const mensajes = await api('/api/revision/pendientes');
+      if (!mensajes) return;
       const lista = document.getElementById('lista');
       lista.innerHTML = '';
 
@@ -62,11 +78,7 @@
       if (accion === 'aprobar') {
         body.contenidoEditado = textarea.value;
       }
-      await fetch(`/api/revision/${mensajeId}/decidir`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
+      await api(`/api/revision/${mensajeId}/decidir`, { method: 'POST', body: JSON.stringify(body) });
       cargar();
     }
 

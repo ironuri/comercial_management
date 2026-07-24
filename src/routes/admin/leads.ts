@@ -34,13 +34,19 @@ leadsAdminRouter.get("/", async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
 
   const ids = (conversaciones ?? []).map((c) => c.id);
-  const { data: leadsData } = await supabase
-    .from("leads")
-    .select("conversacion_id, score, nombre_contacto, necesidad, contacto")
-    .in("conversacion_id", ids.length ? ids : [""]);
+  const [{ data: leadsData }, { data: pausados }] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("conversacion_id, score, nombre_contacto, necesidad, contacto")
+      .in("conversacion_id", ids.length ? ids : [""]),
+    supabase.from("contactos_pausados").select("empresa_id, canal, remitente_contacto"),
+  ]);
 
   const mapaLeads = new Map((leadsData ?? []).map((l) => [l.conversacion_id, l]));
   const mapaActividad = await calcularUltimaActividad(ids);
+  const clavesPausadas = new Set(
+    (pausados ?? []).map((p) => `${p.empresa_id}::${p.canal}::${p.remitente_contacto}`)
+  );
 
   let resultado = (conversaciones ?? []).map((c) => {
     const ultimaActividad = mapaActividad.get(c.id) ?? c.created_at;
@@ -60,6 +66,7 @@ leadsAdminRouter.get("/", async (req, res) => {
       nombreContacto: lead?.nombre_contacto ?? null,
       necesidad: lead?.necesidad ?? null,
       contacto: lead?.contacto ?? null,
+      pausado: clavesPausadas.has(`${c.empresa_id}::${c.canal}::${c.remitente_contacto}`),
     };
   });
 
@@ -105,6 +112,14 @@ leadsAdminRouter.get("/:conversacionId", async (req, res) => {
     .eq("conversacion_id", req.params.conversacionId)
     .order("created_at", { ascending: true });
 
+  const { data: pausado } = await supabase
+    .from("contactos_pausados")
+    .select("empresa_id")
+    .eq("empresa_id", conversacion.empresa_id)
+    .eq("canal", conversacion.canal)
+    .eq("remitente_contacto", conversacion.remitente_contacto)
+    .maybeSingle();
+
   const mapaActividad = await calcularUltimaActividad([req.params.conversacionId]);
   const ultimaActividad = mapaActividad.get(req.params.conversacionId) ?? conversacion.created_at;
 
@@ -116,7 +131,51 @@ leadsAdminRouter.get("/:conversacionId", async (req, res) => {
     ultimaActividad,
     lead,
     mensajes: mensajes ?? [],
+    pausado: Boolean(pausado),
   });
+});
+
+const esquemaPausa = z.object({ pausado: z.boolean() });
+
+// "Tomar el control" de un chat desde el panel interno: pausa el bot para
+// ese contacto concreto en ese canal, igual que ya puede hacer el propio
+// cliente desde su portal (ver 019_portal_pausa_contacto.sql). Útil cuando
+// el equipo de LeadSift gestiona la venta directamente para ese cliente.
+leadsAdminRouter.post("/:conversacionId/pausar", async (req, res) => {
+  const parseo = esquemaPausa.safeParse(req.body);
+  if (!parseo.success) return res.status(400).json({ error: parseo.error.flatten() });
+
+  const { data: conversacion, error: errorConversacion } = await supabase
+    .from("conversaciones")
+    .select("empresa_id, canal, remitente_contacto")
+    .eq("id", req.params.conversacionId)
+    .single();
+
+  if (errorConversacion || !conversacion) return res.status(404).json({ error: "Lead no encontrado" });
+
+  if (parseo.data.pausado) {
+    const { error } = await supabase.from("contactos_pausados").upsert(
+      {
+        empresa_id: conversacion.empresa_id,
+        canal: conversacion.canal,
+        remitente_contacto: conversacion.remitente_contacto,
+        pausado_en: new Date().toISOString(),
+        pausado_por: req.perfil?.id ?? null,
+      },
+      { onConflict: "empresa_id,canal,remitente_contacto" }
+    );
+    if (error) return res.status(500).json({ error: error.message });
+  } else {
+    const { error } = await supabase
+      .from("contactos_pausados")
+      .delete()
+      .eq("empresa_id", conversacion.empresa_id)
+      .eq("canal", conversacion.canal)
+      .eq("remitente_contacto", conversacion.remitente_contacto);
+    if (error) return res.status(500).json({ error: error.message });
+  }
+
+  res.json({ ok: true, pausado: parseo.data.pausado });
 });
 
 const esquemaActualizacion = z.object({
