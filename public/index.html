@@ -3,272 +3,410 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LeadSift — Filtra y cualifica tus leads comerciales | Barcelona</title>
-<meta name="description" content="Recibimos las consultas de tus clientes, separamos el interés real del ruido y te entregamos solo los leads cualificados. Sin contratar personal comercial extra.">
+<title>LeadSift — Atiende a cualquier hora, sin perder tiempo en spam | Barcelona</title>
+<meta name="description" content="Recibimos las consultas de tus clientes por email, formulario y WhatsApp, apartamos el ruido y te avisamos solo cuando hay una oportunidad real, a cualquier hora.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='22' fill='%23B54A2C'/%3E%3Cpolygon points='24,20 72,20 67,30 29,30' fill='%23F0C5AE'/%3E%3Cpolygon points='30,31 66,31 61,41 35,41' fill='%23D98F72'/%3E%3Cpolygon points='36,42 60,42 55,52 41,52' fill='%237A2F19'/%3E%3Cpolygon points='41,52 55,52 48,64' fill='%23FBF6EE'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
   :root {
-    --arcilla: #B54A2C;
-    --arcilla-oscuro: #7A2F19;
-    --ciruela: #4A2545;
     --crema: #FBF6EE;
-    --texto: #2B2620;
+    --crema-panel: #F3E9DA;
+    --tinta: #2B2620;
+    --arcilla: #B54A2C;
+    --arcilla-fuerte: #7A2F19;
+    --arcilla-suave: #D98F72;
+    --ciruela: #4A2545;
+    --ciruela-profundo: #2E1730;
     --gris: #7A6B5C;
+    --borde: rgba(43, 38, 32, 0.12);
+    --foco: #2F7FD1;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
     margin: 0;
-    color: var(--texto);
     background: var(--crema);
-    line-height: 1.55;
+    color: var(--tinta);
+    font-family: 'Work Sans', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, .numero, .marca-lockup span, .etiqueta { font-family: 'Poppins', system-ui, sans-serif; }
-  a { color: var(--arcilla-oscuro); }
+  img, svg { max-width: 100%; display: block; }
+  h1, h2, h3, .kicker, .marca-lockup span { font-family: 'Poppins', system-ui, sans-serif; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible, textarea:focus-visible, input:focus-visible {
+    outline: 2px solid var(--foco);
+    outline-offset: 2px;
+  }
 
-  .marca-barra { padding: 1.25rem 1.5rem 0; }
-  .marca-barra .contenedor { display: flex; align-items: center; justify-content: space-between; }
-  .enlace-acceso { font-size: 0.9rem; font-weight: 600; color: var(--arcilla-oscuro); text-decoration: none; }
-  .marca-lockup { display: flex; align-items: center; gap: 10px; }
-  .marca-lockup svg { width: 30px; height: 30px; flex-shrink: 0; }
-  .marca-lockup span { font-weight: 700; font-size: 1.3rem; color: var(--texto); }
+  .kicker {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--arcilla-fuerte);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .kicker::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--arcilla);
+    flex-shrink: 0;
+  }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+  .wrap-ancho { max-width: 960px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ---------- Nav ---------- */
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; }
+  .marca-lockup { display: flex; align-items: center; gap: 9px; }
+  .marca-lockup svg { width: 26px; height: 26px; }
+  .marca-lockup span { font-weight: 700; font-size: 1.15rem; color: var(--tinta); }
   .marca-lockup span em { color: var(--arcilla); font-style: normal; }
+  .nav-acceso { font-size: 0.88rem; font-weight: 600; text-decoration: none; color: var(--gris); }
+  .nav-acceso:hover { color: var(--tinta); }
 
-  header.hero {
-    background: linear-gradient(135deg, var(--arcilla), var(--arcilla-oscuro));
-    color: white;
-    padding: 3rem 1.5rem 5rem;
-    text-align: center;
+  /* ---------- Hero ---------- */
+  .hero { padding: 2.5rem 0 4rem; text-align: center; }
+  .hero-visual { position: relative; height: 150px; margin: 0 auto 1.5rem; width: 220px; }
+  .hero-visual svg.embudo { position: absolute; top: 0; left: 0; width: 100%; height: 60px; }
+  .particula {
+    position: absolute; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--arcilla); top: -10px; left: 50%; opacity: 0;
   }
-  header.hero h1 { font-size: 2.3rem; margin-bottom: 0.9rem; }
-  header.hero p.subtitulo { font-size: 1.2rem; opacity: 0.94; max-width: 620px; margin: 0 auto 2rem; }
+  .particula.ruido { background: var(--gris); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .particula { animation: caer 3.6s cubic-bezier(.4,0,.2,1) infinite; }
+    .particula.p1 { left: 38%; animation-delay: 0s; }
+    .particula.p2 { left: 50%; animation-delay: .5s; }
+    .particula.p3 { left: 62%; animation-delay: 1s; }
+    .particula.ruido.p4 { left: 30%; animation-delay: 1.6s; animation-name: caer-ruido-izq; }
+    .particula.p5 { left: 50%; animation-delay: 2.1s; }
+    .particula.ruido.p6 { left: 70%; animation-delay: 2.7s; animation-name: caer-ruido-der; }
+    @keyframes caer {
+      0%   { top: -10px; opacity: 0; }
+      8%   { opacity: 1; }
+      42%  { top: 60px; opacity: 1; }
+      55%  { top: 84px; opacity: 1; }
+      95%  { top: 142px; opacity: 0; }
+      100% { top: 142px; opacity: 0; }
+    }
+    @keyframes caer-ruido-izq {
+      0%   { top: -10px; opacity: 0; }
+      8%   { opacity: .55; }
+      40%  { top: 54px; opacity: .55; }
+      70%  { top: 90px; left: 4%; opacity: 0; }
+      100% { opacity: 0; }
+    }
+    @keyframes caer-ruido-der {
+      0%   { top: -10px; opacity: 0; }
+      8%   { opacity: .55; }
+      40%  { top: 54px; opacity: .55; }
+      70%  { top: 90px; left: 96%; opacity: 0; }
+      100% { opacity: 0; }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .particula { opacity: .8; top: 90px; }
+  }
+
+  .hero h1 {
+    font-size: clamp(1.9rem, 5.4vw, 2.7rem);
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -0.01em;
+    margin: 0.9rem auto 1.1rem;
+    max-width: 15ch;
+  }
+  .hero .sub { color: var(--gris); font-size: 1.06rem; max-width: 46ch; margin: 0 auto 2rem; }
   .cta-grupo { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
   .btn {
-    display: inline-block;
-    padding: 0.8rem 1.6rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
+    display: inline-flex; align-items: center; gap: 0.4em;
+    padding: 0.85rem 1.5rem; border-radius: 999px;
+    font-size: 0.98rem; font-weight: 600; text-decoration: none; cursor: pointer;
+    border: 1px solid transparent; font-family: 'Work Sans', sans-serif;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
-  .btn-primario { background: var(--ciruela); color: white; }
-  .btn-secundario { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.5); }
+  .btn-primario { background: var(--arcilla); color: #FFF6EF; }
+  .btn-primario:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -10px rgba(181,74,44,0.55); }
+  .btn-secundario { background: transparent; color: var(--tinta); border-color: var(--borde); }
+  .btn-secundario:hover { border-color: var(--gris); }
 
-  .contenedor { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
-  section.bloque { padding: 3.5rem 0; }
-  section.bloque.alterno { background: white; }
-  h2 { font-size: 1.7rem; text-align: center; margin-bottom: 0.5rem; }
-  p.intro-seccion { text-align: center; color: var(--gris); max-width: 600px; margin: 0 auto 2rem; }
+  /* ---------- Reveal on scroll ---------- */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
 
-  .como-funciona {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
+  /* ---------- Secciones generales ---------- */
+  section { padding: 3.5rem 0; }
+  .seccion-cabecera { text-align: center; margin-bottom: 2.25rem; }
+  .seccion-cabecera h2 { font-size: clamp(1.5rem, 3.4vw, 1.85rem); margin-top: 0.6rem; max-width: 24ch; margin-inline: auto; }
+
+  /* ---------- Cómo funciona ---------- */
+  .pasos { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+  @media (min-width: 720px) { .pasos { grid-template-columns: repeat(3, 1fr); } }
+  .paso { padding: 1.6rem 1.4rem 1.5rem; background: #FFFFFF; border: 1px solid var(--borde); border-radius: 14px; }
+  .paso .num { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--arcilla-fuerte); letter-spacing: 0.06em; margin-bottom: 0.6rem; display: block; }
+  .paso h3 { font-size: 1.06rem; margin-bottom: 0.4rem; }
+  .paso p { color: var(--gris); font-size: 0.94rem; }
+
+  .divisor-tamiz { display: flex; align-items: center; justify-content: center; margin: 0 auto; max-width: 720px; padding: 0 1.5rem; opacity: .5; }
+  .divisor-tamiz svg { width: 100%; height: 14px; }
+
+  /* ---------- Dos pilares ---------- */
+  .pilares { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+  @media (min-width: 720px) { .pilares { grid-template-columns: 1fr 1fr; } }
+  .pilar { background: var(--crema-panel); border-radius: 18px; padding: 2rem 1.75rem; }
+  .pilar .icono { width: 40px; height: 40px; margin-bottom: 1.1rem; color: var(--arcilla-fuerte); }
+  .pilar h3 { font-size: 1.2rem; margin-bottom: 0.55rem; }
+  .pilar p { color: var(--gris); font-size: 0.97rem; }
+
+  /* ---------- Demo ---------- */
+  .demo-section { padding-top: 1.5rem; padding-bottom: 4rem; }
+  .demo-card {
+    background: linear-gradient(175deg, var(--ciruela), var(--ciruela-profundo) 65%);
+    border-radius: 22px;
+    padding: 2.1rem 1.4rem 1.75rem;
+    color: #F3E9E4;
+    box-shadow: 0 24px 60px -24px rgba(46, 23, 48, 0.55);
+    position: relative;
+    overflow: hidden;
   }
-  .paso { background: var(--crema); border-radius: 10px; padding: 1.5rem; border: 1px solid #eaded0; }
-  .paso .numero {
-    display: inline-block; width: 28px; height: 28px;
-    background: var(--arcilla); color: white; border-radius: 50%;
-    text-align: center; line-height: 28px; font-weight: bold; margin-bottom: 0.75rem;
+  .demo-card::before {
+    content: '';
+    position: absolute; inset: -40% -20% auto auto;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(181,74,44,0.45), transparent 70%);
+    pointer-events: none;
   }
+  .demo-head { position: relative; margin-bottom: 1.4rem; }
+  .demo-head .kicker { color: var(--arcilla-suave); }
+  .demo-head .kicker::before { background: #6FE39A; box-shadow: 0 0 0 3px rgba(111,227,154,0.3); }
+  .demo-head h2 { color: #F3E9E4; font-size: clamp(1.35rem, 3.2vw, 1.65rem); margin: 0.6rem 0 0.6rem; max-width: 22ch; }
+  .demo-head p { color: rgba(243,233,228,0.8); font-size: 0.95rem; max-width: 48ch; }
 
-  .beneficios { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
-  .beneficio { padding: 1.25rem; }
-  .beneficio h3 { font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--arcilla-oscuro); }
-  .beneficio p { font-size: 0.95rem; color: #444; margin: 0; }
-
-  .credibilidad {
-    background: #F3E4DC;
+  .aviso-demo {
+    display: flex; gap: 0.6rem; align-items: flex-start;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
     border-radius: 10px;
-    padding: 1.5rem 1.75rem;
-    text-align: center;
-    font-size: 1.02rem;
-    color: var(--arcilla-oscuro);
+    padding: 0.75rem 0.9rem;
+    font-size: 0.84rem;
+    color: rgba(243,233,228,0.92);
+    margin: 1.3rem 0 1.4rem;
   }
+  .aviso-demo .punto { color: #6FE39A; flex-shrink: 0; margin-top: 0.15rem; }
 
-  .demo-caja {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    border: 1px solid #eaded0;
+  .chat {
+    display: flex; flex-direction: column; gap: 0.6rem;
+    min-height: 140px; max-height: 360px; overflow-y: auto;
+    padding-right: 0.25rem;
   }
-  .demo-caja p.aviso { font-size: 0.85rem; color: var(--gris); margin-top: -0.5rem; margin-bottom: 1.25rem; }
-  label[for="demo-input"] { display: block; font-weight: 600; margin-bottom: 0.4rem; }
-  textarea#demo-input {
-    width: 100%; min-height: 90px; padding: 0.75rem;
-    border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 1rem;
-  }
-  button#demo-enviar {
-    margin-top: 0.75rem; background: var(--ciruela); color: white; border: none;
-    padding: 0.7rem 1.4rem; border-radius: 8px; font-size: 1rem; cursor: pointer;
-  }
-  button#demo-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
-  .ejemplos { margin-top: 0.75rem; font-size: 0.85rem; }
-  .ejemplos button {
-    background: #F3E4DC; border: 1px solid #e6cdbd; color: var(--arcilla-oscuro);
-    border-radius: 6px; padding: 0.3rem 0.6rem; margin: 0.2rem 0.3rem 0.2rem 0;
-    cursor: pointer; font-size: 0.8rem;
-  }
-  #demo-resultado { margin-top: 1.5rem; }
-  .resultado-tarjeta { background: #FBF2EA; border-left: 4px solid var(--arcilla); border-radius: 6px; padding: 1rem 1.25rem; }
-  .resultado-tarjeta.spam { border-left-color: #999; background: #f5f5f5; }
-  .etiqueta {
-    display: inline-block; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
-    background: var(--arcilla); color: white; padding: 0.15rem 0.6rem; border-radius: 20px; margin-bottom: 0.6rem;
-  }
-  .ficha-lead div { margin-bottom: 0.35rem; font-size: 0.95rem; }
-  .legal-aviso { font-size: 0.8rem; color: var(--gris); margin-top: 0.75rem; }
-  .legal-aviso a { color: var(--gris); text-decoration: underline; }
+  .burbuja { max-width: 85%; padding: 0.7rem 0.95rem; border-radius: 14px; font-size: 0.94rem; line-height: 1.5; white-space: pre-wrap; }
+  .burbuja.usuario { align-self: flex-end; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16); border-bottom-right-radius: 4px; color: #F3E9E4; }
+  .burbuja.bot { align-self: flex-start; background: #FBF6EE; color: var(--tinta); border-bottom-left-radius: 4px; }
+  .burbuja.bot.escribiendo { color: var(--gris); font-style: italic; }
 
-  footer.pie {
-    background: var(--texto);
-    color: rgba(255,255,255,0.85);
-    text-align: center;
-    padding: 2rem 1.5rem;
-    font-size: 0.85rem;
+  .demo-input-row {
+    margin-top: 1.3rem;
+    display: flex; gap: 0.6rem; align-items: center;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    padding: 0.4rem 0.4rem 0.4rem 1.1rem;
   }
-  footer.pie a { color: white; margin: 0 0.6rem; }
-  .pie-lockup { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 0.5rem; }
-  .pie-lockup svg { width: 22px; height: 22px; }
-  .pie-lockup span { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--crema); }
-  .pie-lockup span em { color: #D98F72; font-style: normal; }
+  .demo-input-row input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #F3E9E4; font-family: 'Work Sans', sans-serif; font-size: 0.95rem;
+  }
+  .demo-input-row input::placeholder { color: rgba(243,233,228,0.55); }
+  .demo-input-row input:disabled { opacity: 0.6; }
+  .demo-send {
+    background: var(--arcilla); color: #2E1300;
+    border: none; width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; font-size: 1.05rem;
+  }
+  .demo-send:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .ejemplos { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .chip-ejemplo {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(243,233,228,0.9); border-radius: 999px; padding: 0.4rem 0.85rem;
+    font-size: 0.82rem; cursor: pointer; font-family: 'Work Sans', sans-serif;
+  }
+  .chip-ejemplo:hover { border-color: rgba(255,255,255,0.4); }
+  .chip-ejemplo:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .legal-aviso { font-size: 0.78rem; color: rgba(243,233,228,0.65); margin-top: 1.1rem; }
+  .legal-aviso a { color: rgba(243,233,228,0.85); text-decoration: underline; }
+
+  /* ---------- Cierre ---------- */
+  .cierre { text-align: center; }
+  .cierre h2 { font-size: clamp(1.4rem, 3vw, 1.7rem); margin-bottom: 0.75rem; }
+  .cierre p { color: var(--gris); max-width: 42ch; margin: 0 auto 1.75rem; }
+
+  /* ---------- Footer ---------- */
+  footer { padding: 2.5rem 1.5rem 3rem; text-align: center; color: var(--gris); font-size: 0.85rem; border-top: 1px solid var(--borde); }
+  footer .marca-lockup { justify-content: center; margin-bottom: 0.6rem; }
+  footer .enlaces a { text-decoration: none; margin: 0 0.6rem; color: var(--gris); }
+  footer .enlaces a:hover { color: var(--tinta); }
 
   .whatsapp-flotante {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    background: #25D366;
-    color: white;
-    border-radius: 50px;
-    padding: 0.8rem 1.2rem;
-    text-decoration: none;
-    font-weight: 600;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
-    z-index: 500;
-    font-size: 0.95rem;
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: #25D366; color: white; border-radius: 50px;
+    padding: 0.8rem 1.2rem; text-decoration: none; font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25); z-index: 500; font-size: 0.95rem;
   }
 
   #banner-cookies {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #1b1b1b;
-    color: #eee;
-    padding: 1rem 1.5rem;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    z-index: 1000;
-    font-size: 0.9rem;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #1b1b1b; color: #eee; padding: 1rem 1.5rem;
+    display: none; align-items: center; justify-content: center; gap: 1rem;
+    flex-wrap: wrap; z-index: 1000; font-size: 0.9rem;
   }
   #banner-cookies a { color: #e6b49a; }
-  #banner-cookies button {
-    background: var(--ciruela); color: white; border: none; padding: 0.5rem 1.1rem;
-    border-radius: 6px; cursor: pointer; font-weight: 600;
-  }
+  #banner-cookies button { background: var(--ciruela); color: white; border: none; padding: 0.5rem 1.1rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
   #banner-cookies button.rechazar { background: transparent; border: 1px solid #999; color: #ccc; }
 </style>
 </head>
 <body>
 
-<div class="marca-barra">
-  <div class="contenedor">
-    <div class="marca-lockup">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <polygon points="18,18 78,18 71,30 25,30" fill="#D98F72"/>
-        <polygon points="25,31 71,31 64,43 32,43" fill="#B54A2C"/>
-        <polygon points="32,44 64,44 57,56 39,56" fill="#7A2F19"/>
-        <polygon points="39,56 57,56 48,73" fill="#4A2545"/>
-      </svg>
-      <span>Lead<em>Sift</em></span>
-    </div>
-    <a href="/login.html" class="enlace-acceso">Acceder</a>
+<nav class="nav wrap-ancho">
+  <div class="marca-lockup">
+    <svg viewBox="0 0 96 96" aria-hidden="true">
+      <polygon points="18,18 78,18 71,30 25,30" fill="#D98F72"/>
+      <polygon points="25,31 71,31 64,43 32,43" fill="#B54A2C"/>
+      <polygon points="32,44 64,44 57,56 39,56" fill="#7A2F19"/>
+      <polygon points="39,56 57,56 48,73" fill="#4A2545"/>
+    </svg>
+    <span>Lead<em>Sift</em></span>
   </div>
-</div>
+  <a href="/login.html" class="nav-acceso">Acceder</a>
+</nav>
 
-<header class="hero">
-  <div class="contenedor">
-    <h1>Nunca más pierdas una venta por no contestar a tiempo</h1>
-    <p class="subtitulo">Recibimos las consultas de tus clientes por email, formulario y WhatsApp, separamos el interés real del ruido, y te avisamos solo cuando hay una venta de verdad esperando.</p>
-    <div class="cta-grupo">
-      <a href="#demo" class="btn btn-primario">Pregúntanos y compruébalo tú mismo</a>
-      <a href="https://wa.me/34000000000" target="_blank" rel="noopener" class="btn btn-secundario">Hablar por WhatsApp</a>
-    </div>
+<header class="hero wrap">
+  <div class="hero-visual" aria-hidden="true">
+    <svg class="embudo" viewBox="0 0 220 60" preserveAspectRatio="none">
+      <polygon points="30,0 190,0 150,50 70,50" fill="none" stroke="var(--borde)" stroke-width="1.5"/>
+    </svg>
+    <span class="particula p1"></span>
+    <span class="particula p2"></span>
+    <span class="particula p3"></span>
+    <span class="particula ruido p4"></span>
+    <span class="particula p5"></span>
+    <span class="particula ruido p6"></span>
+  </div>
+  <span class="kicker">Filtrado de consultas, en vivo</span>
+  <h1>Responde a cualquier hora. Atiende solo lo que importa.</h1>
+  <p class="sub">LeadSift recibe las consultas de tus clientes por email, formulario y WhatsApp, aparta el ruido y te avisa cuando hay una oportunidad real — a cualquier hora, sin que nadie tenga que estar pendiente.</p>
+  <div class="cta-grupo">
+    <a href="#demo" class="btn btn-primario">Pruébalo tú mismo →</a>
+    <a href="https://wa.me/34000000000" target="_blank" rel="noopener" class="btn btn-secundario">Hablar por WhatsApp</a>
   </div>
 </header>
 
-<section class="bloque contenedor">
-  <h2>Cada consulta que tarda en contestarse es una venta que se va a otro</h2>
-  <p class="intro-seccion" style="text-align:left; max-width:100%;">
-    Un cliente potencial escribe. Pasan las horas. Nadie de tu equipo tiene tiempo de mirarlo hasta el día siguiente — y para entonces ya ha llamado a la competencia.
-    <br><br>
-    Contestar en los primeros 5 minutos multiplica hasta por 8-10 la probabilidad de cerrar la venta frente a esperar una hora. Pero contratar a alguien solo para vigilar el email, el formulario y el WhatsApp todo el día no es rentable para una pyme — y la mayoría de esas consultas, además, ni siquiera son una oportunidad real: son curiosidad, spam, o preguntas que se responden solas.
-    <br><br>
-    El resultado: o pierdes tiempo revisando de todo, o pierdes ventas por no llegar a tiempo. Las dos opciones cuestan dinero.
-  </p>
-</section>
-
-<section class="bloque alterno">
-  <div class="contenedor">
-    <h2>Así te quitamos ese peso de encima</h2>
-    <p class="intro-seccion">Cuatro pasos, sin que tengas que cambiar cómo trabajas hoy.</p>
-    <div class="como-funciona">
-      <div class="paso"><span class="numero">1</span><p><strong>Recibimos</strong> — Conectamos con tu email, tu formulario web y tu WhatsApp. Todas las consultas entran por un único sitio, a cualquier hora.</p></div>
-      <div class="paso"><span class="numero">2</span><p><strong>Tamizamos</strong> — Descartamos spam, respondemos al momento lo que es solo una duda, y detectamos lo que es una oportunidad real.</p></div>
-      <div class="paso"><span class="numero">3</span><p><strong>Te avisamos</strong> — Solo te llega lo que importa, con toda la información ya recogida: quién es, qué necesita, con qué urgencia.</p></div>
-      <div class="paso"><span class="numero">4</span><p><strong>Tú decides</strong> — Te lo derivamos a tu equipo comercial, o lo gestionamos nosotros hasta el cierre.</p></div>
+<section class="wrap reveal">
+  <div class="seccion-cabecera">
+    <span class="kicker">Cómo funciona</span>
+    <h2>Tres pasos, sin cambiar cómo trabajas hoy</h2>
+  </div>
+  <div class="pasos">
+    <div class="paso">
+      <span class="num">01</span>
+      <h3>Te escriben, a cualquier hora</h3>
+      <p>Email, formulario o WhatsApp: todas las consultas entran por un único sitio, también fuera de horario.</p>
+    </div>
+    <div class="paso">
+      <span class="num">02</span>
+      <h3>Filtramos lo que no importa</h3>
+      <p>El spam se descarta y las dudas sueltas se responden al momento, sin ocupar tu tiempo.</p>
+    </div>
+    <div class="paso">
+      <span class="num">03</span>
+      <h3>Te avisamos con todo listo</h3>
+      <p>Solo cuando hay una oportunidad real, con quién es, qué necesita y con qué urgencia.</p>
     </div>
   </div>
 </section>
 
-<section class="bloque contenedor">
-  <h2>Lo que cambia para tu negocio</h2>
-  <div class="beneficios">
-    <div class="beneficio"><h3>Te ahorras un puesto comercial</h3><p>No necesitas contratar a nadie solo para leer consultas y decidir cuáles valen la pena.</p></div>
-    <div class="beneficio"><h3>Disponibilidad real, 24 horas</h3><p>Un cliente que escribe un sábado por la noche recibe respuesta igual que uno que escribe un martes a mediodía.</p></div>
-    <div class="beneficio"><h3>Dejas de perder ventas</h3><p>La respuesta inmediata deja de depender de que alguien de tu equipo esté libre en ese momento.</p></div>
-    <div class="beneficio"><h3>Tu equipo se centra en lo que importa</h3><p>Nada de perder horas descartando spam: a ti solo te llegan las oportunidades reales.</p></div>
-  </div>
-</section>
+<div class="divisor-tamiz" aria-hidden="true">
+  <svg viewBox="0 0 720 14" preserveAspectRatio="none">
+    <line x1="0" y1="7" x2="720" y2="7" stroke="var(--borde)" stroke-width="1" stroke-dasharray="1 7" stroke-linecap="round"/>
+  </svg>
+</div>
 
-<section class="bloque alterno">
-  <div class="contenedor">
-    <div class="credibilidad">
-      Así funciona con clientes reales. Este mismo sistema es el que usamos hoy para gestionar consultas comerciales — no es una maqueta ni una demo aislada, es el producto real funcionando.
+<section class="wrap-ancho reveal">
+  <div class="seccion-cabecera">
+    <span class="kicker">Lo que cambia</span>
+    <h2>Dos cosas, hechas bien</h2>
+  </div>
+  <div class="pilares">
+    <div class="pilar">
+      <svg class="icono" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2"/><path d="M20 10v10l7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <h3>Disponible a cualquier hora</h3>
+      <p>Un sábado por la noche o un martes a mediodía: la respuesta llega igual de rápido. Ninguna consulta se queda esperando a que alguien la vea.</p>
+    </div>
+    <div class="pilar">
+      <svg class="icono" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M8 8h24l-8 13v11l-8 4V21z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <h3>Solo lo que merece tu atención</h3>
+      <p>Preguntas sueltas, spam, curiosidad: se quedan fuera. A ti te llega lo que de verdad puede convertirse en una venta.</p>
     </div>
   </div>
 </section>
 
-<section class="bloque contenedor" id="demo">
-  <h2>Pregúntanos por nuestros propios servicios y precios</h2>
-  <p class="intro-seccion">Compruébalo con tus propios ojos: escribe como si fueras un cliente interesado en LeadSift y mira cómo respondemos, en vivo.</p>
-  <div class="demo-caja">
-    <label for="demo-input">Escribe tu consulta</label>
-    <p class="aviso">
-      Esto es una demo en vivo: tu mensaje se procesa con el mismo sistema que usarían tus clientes. No se envía a ningún comercial ni se guarda como lead real.
-    </p>
-    <textarea id="demo-input" placeholder="Ej: Hola, ¿cuánto cuesta el servicio y qué incluye?"></textarea>
+<section class="demo-section wrap reveal" id="demo">
+  <div class="demo-card">
+    <div class="demo-head">
+      <span class="kicker">Pruébalo en vivo</span>
+      <h2>Habla con el sistema real, ahora mismo</h2>
+      <p>Escribe como si fueras un cliente interesado en LeadSift. No es una simulación aparte: es el mismo sistema que atendería a tus clientes, respondiendo en directo.</p>
+    </div>
+
+    <div class="aviso-demo">
+      <span class="punto">●</span>
+      <span>Esta conversación la atiende el sistema real de LeadSift. Si nos dejas tu contacto, te escribimos nosotros — si no, no pasa nada: sigue preguntando lo que quieras.</span>
+    </div>
+
+    <div class="chat" id="demo-chat"></div>
+
     <div class="ejemplos">
-      <button type="button" onclick="rellenarEjemplo(0)">Ejemplo: precio del servicio</button>
-      <button type="button" onclick="rellenarEjemplo(1)">Ejemplo: cómo funciona</button>
-      <button type="button" onclick="rellenarEjemplo(2)">Ejemplo: spam</button>
+      <button type="button" class="chip-ejemplo" data-ejemplo="¿Cuánto cuesta el servicio y qué incluye?">¿Cuánto cuesta?</button>
+      <button type="button" class="chip-ejemplo" data-ejemplo="¿Cómo funciona exactamente? ¿Vosotros contestáis a mis clientes o solo me avisáis?">¿Cómo funciona?</button>
+      <button type="button" class="chip-ejemplo" data-ejemplo="Tengo una tienda de muebles y recibimos bastantes consultas por WhatsApp, ¿esto encaja con nosotros?">Nuestro caso encaja?</button>
     </div>
-    <br>
-    <button id="demo-enviar" onclick="enviarDemo()">Probar ahora</button>
-    <div id="demo-resultado"></div>
-    <p class="legal-aviso">Al enviar tu consulta aceptas nuestra <a href="/privacidad.html">Política de Privacidad</a>. No usamos tus datos para nada distinto de mostrarte esta demo.</p>
+
+    <form class="demo-input-row" id="demo-form">
+      <input type="text" id="demo-input" placeholder="Escribe tu consulta…" autocomplete="off" maxlength="1000" />
+      <button type="submit" class="demo-send" id="demo-enviar" aria-label="Enviar">→</button>
+    </form>
+
+    <p class="legal-aviso">Al escribir aceptas nuestra <a href="/privacidad.html">Política de Privacidad</a>. Solo guardamos esta conversación como un lead real si tú nos dejas algún dato de contacto.</p>
   </div>
 </section>
 
-<footer class="pie">
-  <div class="pie-lockup">
-    <svg viewBox="0 0 96 96" aria-hidden="true">
+<section class="wrap cierre reveal">
+  <span class="kicker">¿Hablamos?</span>
+  <h2>Compruébalo con tus propios ojos</h2>
+  <p>Sube y escríbenos algo real — es la forma más honesta que tenemos de enseñarte cómo funciona.</p>
+  <div class="cta-grupo">
+    <a href="#demo" class="btn btn-primario">Ir a la demo</a>
+    <a href="https://wa.me/34000000000" target="_blank" rel="noopener" class="btn btn-secundario">Hablar por WhatsApp</a>
+  </div>
+</section>
+
+<footer>
+  <div class="marca-lockup">
+    <svg viewBox="0 0 96 96" aria-hidden="true" width="22" height="22">
       <polygon points="18,18 78,18 71,30 25,30" fill="#F0C5AE"/>
       <polygon points="25,31 71,31 64,43 32,43" fill="#D98F72"/>
       <polygon points="32,44 64,44 57,56 39,56" fill="#B54A2C"/>
@@ -277,7 +415,7 @@
     <span>Lead<em>Sift</em></span>
   </div>
   <div>filtramos tus consultas comerciales para que solo llegue lo que importa.</div>
-  <div style="margin-top:0.75rem;">
+  <div class="enlaces" style="margin-top:0.75rem;">
     <a href="mailto:hola@leadsift.es">hola@leadsift.es</a>
     <a href="/aviso-legal.html">Aviso legal</a>
     <a href="/privacidad.html">Privacidad</a>
@@ -296,71 +434,102 @@
 </div>
 
 <script>
-  const ejemplos = [
-    "Hola, ¿cuánto cuesta el servicio y qué incluye?",
-    "¿Cómo funciona exactamente? ¿Vosotros contestáis a mis clientes o solo me avisáis?",
-    "Gana dinero rápido invirtiendo en criptomonedas, escríbenos ya!!!"
-  ];
+  // --- Demo en vivo: llama directamente a /api/ingesta, el mismo endpoint
+  // que usaría el widget de chat_web de cualquier cliente real. No es una
+  // simulación aparte: si el sistema detecta intención de compra o el
+  // visitante deja un contacto, se genera un lead real y se notifica al
+  // equipo, exactamente igual que para cualquier otro canal.
+  const LEADSIFT_EMPRESA_ID = '6df90365-95da-4777-bf31-cc8c30457da6';
+  const LEADSIFT_TOKEN_INGESTA = '85134f99e13d4e2a8c1cd9134f3c454fc21585e6678b42b293cceb62b42eb0e0';
 
-  function rellenarEjemplo(i) {
-    document.getElementById('demo-input').value = ejemplos[i];
+  function idSesionDemo() {
+    let id = sessionStorage.getItem('ls_demo_sesion');
+    if (!id) {
+      id = 'web-' + (window.crypto?.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
+      sessionStorage.setItem('ls_demo_sesion', id);
+    }
+    return id;
   }
 
-  async function enviarDemo() {
-    const input = document.getElementById('demo-input');
-    const boton = document.getElementById('demo-enviar');
-    const resultado = document.getElementById('demo-resultado');
-    const texto = input.value.trim();
+  function agregarBurbuja(texto, tipo) {
+    const chat = document.getElementById('demo-chat');
+    const div = document.createElement('div');
+    div.className = 'burbuja ' + tipo;
+    div.textContent = texto;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  async function enviarMensajeDemo(texto) {
+    texto = texto.trim();
     if (!texto) return;
 
+    const input = document.getElementById('demo-input');
+    const boton = document.getElementById('demo-enviar');
+    document.querySelectorAll('.chip-ejemplo').forEach((c) => (c.disabled = true));
+
+    agregarBurbuja(texto, 'usuario');
+    input.value = '';
+    input.disabled = true;
     boton.disabled = true;
-    boton.textContent = 'Analizando tu consulta...';
-    resultado.innerHTML = '';
+    const escribiendo = agregarBurbuja('Escribiendo…', 'bot escribiendo');
 
     try {
-      const res = await fetch('/api/demo', {
+      const res = await fetch('/api/ingesta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto }),
+        body: JSON.stringify({
+          empresaId: LEADSIFT_EMPRESA_ID,
+          token: LEADSIFT_TOKEN_INGESTA,
+          canal: 'chat_web',
+          remitenteContacto: idSesionDemo(),
+          texto,
+        }),
       });
       const datos = await res.json();
+      escribiendo.remove();
 
       if (!res.ok) {
-        resultado.innerHTML = `<div class="resultado-tarjeta"><p>${datos.error?.message || datos.error || 'Ha ocurrido un error'}</p></div>`;
+        agregarBurbuja('No he podido procesar tu mensaje. Inténtalo de nuevo en un momento.', 'bot');
         return;
       }
 
-      resultado.innerHTML = renderizarResultado(datos);
+      let respuesta;
+      if (datos.intencion === 'spam') {
+        respuesta = 'Esto no parece una consulta sobre LeadSift — si tienes alguna duda sobre el servicio, cuéntamelo con confianza.';
+      } else if (datos.intencion === 'informativa') {
+        respuesta = datos.respuesta;
+      } else {
+        respuesta = datos.ficha?.respuestaSugerida || 'Gracias por escribir, en breve te contamos más.';
+      }
+      agregarBurbuja(respuesta, 'bot');
     } catch (e) {
-      resultado.innerHTML = '<div class="resultado-tarjeta"><p>Error de conexión. Inténtalo de nuevo.</p></div>';
+      escribiendo.remove();
+      agregarBurbuja('Error de conexión. Inténtalo de nuevo.', 'bot');
     } finally {
+      input.disabled = false;
       boton.disabled = false;
-      boton.textContent = 'Probar ahora';
+      document.querySelectorAll('.chip-ejemplo').forEach((c) => (c.disabled = false));
+      input.focus();
     }
   }
 
-  function renderizarResultado(datos) {
-    if (datos.intencion === 'spam') {
-      return `<div class="resultado-tarjeta spam"><span class="etiqueta">Descartado como spam</span><p>${datos.mensaje}</p></div>`;
-    }
-    if (datos.intencion === 'informativa') {
-      return `<div class="resultado-tarjeta"><span class="etiqueta">Consulta informativa — respondida al instante</span><p>${datos.respuesta}</p></div>`;
-    }
-    const f = datos.ficha;
-    const etiquetaIntencion = datos.intencion === 'consulta_disponibilidad' ? 'Consulta de disponibilidad' : 'Lead potencial';
-    return `<div class="resultado-tarjeta">
-      <span class="etiqueta">${etiquetaIntencion} · score: ${f.score}</span>
-      <div class="ficha-lead">
-        <div><strong>Necesidad:</strong> ${f.necesidad || '—'}</div>
-        <div><strong>Urgencia:</strong> ${f.urgencia || '—'}</div>
-        <div><strong>Requiere escalado humano:</strong> ${f.requiereEscaladoHumano ? 'Sí' : 'No'}</div>
-        ${f.motivoEscalado ? `<div><strong>Motivo:</strong> ${f.motivoEscalado}</div>` : ''}
-      </div>
-      <p style="margin-top:0.75rem;"><strong>Respuesta que se enviaría:</strong><br>${f.respuestaSugerida}</p>
-    </div>`;
-  }
+  document.getElementById('demo-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    enviarMensajeDemo(document.getElementById('demo-input').value);
+  });
+  document.querySelectorAll('.chip-ejemplo').forEach((chip) => {
+    chip.addEventListener('click', () => enviarMensajeDemo(chip.dataset.ejemplo));
+  });
 
-  // Banner de cookies: solo cookies técnicas hoy, sin analítica de terceros.
+  // --- Reveal on scroll ---
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach((el) => observador.observe(el));
+
+  // --- Banner de cookies: solo cookies técnicas hoy, sin analítica de terceros. ---
   function decidirCookies(aceptado) {
     localStorage.setItem('tamiz_cookies_decision', aceptado ? 'aceptado' : 'rechazado');
     document.getElementById('banner-cookies').style.display = 'none';

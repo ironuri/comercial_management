@@ -5,7 +5,6 @@ import express from "express";
 import helmet from "helmet";
 import { ingestaRouter } from "./routes/ingesta.js";
 import { revisionRouter } from "./routes/revision.js";
-import { demoRouter } from "./routes/demo.js";
 import { webhookWhatsappRouter } from "./routes/webhookWhatsapp.js";
 import { empresasAdminRouter } from "./routes/admin/empresas.js";
 import { promptsAdminRouter } from "./routes/admin/prompts.js";
@@ -33,7 +32,7 @@ const app = express();
 
 // Detrás de un proxy/balanceador (Render, Fly, nginx...) Express ve la IP
 // del proxy en vez de la del cliente real si no se activa esto — y con eso,
-// express-rate-limit (login, demo, ingesta) trata a todos los clientes como
+// express-rate-limit (login, ingesta) trata a todos los clientes como
 // una sola IP, dejando el límite inservible en producción.
 app.set("trust proxy", 1);
 
@@ -50,7 +49,14 @@ app.use(
         // bloquea silenciosamente cualquier onclick="..." aunque scriptSrc
         // permita 'unsafe-inline' — hay que igualarlo explícitamente.
         scriptSrcAttr: ["'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        // Sin el host de Google Fonts aquí, el <link> de la hoja de estilos
+        // de fuentes lo bloquea el propio navegador (violación de CSP) sin
+        // avisar visualmente — se ve bien igual porque cae al font-family de
+        // reserva (system-ui), así que pasaba desapercibido: admin, portal,
+        // login y la landing llevan meses sirviendo Poppins/Work Sans "de
+        // mentira".
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
         // Permite mostrar las imágenes del catálogo, alojadas en Supabase Storage.
         imgSrc: ["'self'", "data:", "https://*.supabase.co"],
         connectSrc: ["'self'"],
@@ -72,7 +78,6 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use("/api/ingesta", ingestaRouter);
 app.use("/api/revision", requiereInterno, revisionRouter);
-app.use("/api/demo", demoRouter);
 app.use("/api/webhooks/whatsapp", webhookWhatsappRouter);
 app.use("/api/admin/empresas", requiereInterno, empresasAdminRouter);
 app.use("/api/admin/prompts", requiereInterno, promptsAdminRouter);

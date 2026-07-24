@@ -11,7 +11,12 @@ const FRAGMENTOS_POR_CONSULTA = 5;
 // search, en vez de inyectar esos documentos completos en cada consulta.
 // Se recompone en cada consulta entrante, así que un documento nuevo o un
 // prompt editado se aplica de inmediato a la siguiente consulta.
-export async function cargarPromptSistemaActivo(empresaId: string, mensajeTexto: string): Promise<string> {
+export async function cargarPromptSistemaActivo(
+  empresaId: string,
+  mensajeTexto: string,
+  canal?: string,
+  remitenteContacto?: string
+): Promise<string> {
   const { data, error } = await supabase
     .from("prompts_sistema")
     .select("contenido")
@@ -32,9 +37,12 @@ export async function cargarPromptSistemaActivo(empresaId: string, mensajeTexto:
     );
   }
 
-  const [documentosVigentes, fragmentosRelevantes] = await Promise.all([
+  const [documentosVigentes, fragmentosRelevantes, notaContinuidad] = await Promise.all([
     cargarDocumentosVigentes(empresaId),
     buscarFragmentosRelevantes(empresaId, mensajeTexto),
+    canal && remitenteContacto
+      ? construirNotaContinuidad(empresaId, canal, remitenteContacto)
+      : Promise.resolve(null),
   ]);
 
   const bloques: string[] = [];
@@ -49,12 +57,38 @@ export async function cargarPromptSistemaActivo(empresaId: string, mensajeTexto:
         fragmentosRelevantes.map((f) => `- ${f}`).join("\n\n")
     );
   }
+  if (notaContinuidad) {
+    bloques.push(notaContinuidad);
+  }
 
   if (bloques.length === 0) {
     return data.contenido;
   }
 
   return `${data.contenido}\n\nDocumentos de referencia adicionales:\n${bloques.join("\n\n")}`;
+}
+
+// Cada mensaje se procesa de forma independiente (sin historial de
+// conversación), así que sin esto el modelo no tiene forma de saber si este
+// contacto ya ha escrito antes. Es una nota genérica e informativa — no
+// prescribe ningún comportamiento por sí sola, cada prompt decide si le
+// importa o no (p.ej. el prompt de la demo pública la usa para no repetir
+// la oferta de dejar el contacto en cada mensaje).
+async function construirNotaContinuidad(
+  empresaId: string,
+  canal: string,
+  remitenteContacto: string
+): Promise<string | null> {
+  const { count, error } = await supabase
+    .from("conversaciones")
+    .select("id", { count: "exact", head: true })
+    .eq("empresa_id", empresaId)
+    .eq("canal", canal)
+    .eq("remitente_contacto", remitenteContacto);
+
+  if (error || !count) return null;
+
+  return `Nota de contexto: este contacto ya ha escrito antes en esta conversación (este es el mensaje número ${count + 1}).`;
 }
 
 // Documentos que se inyectan enteros (todo menos catálogo/listado de

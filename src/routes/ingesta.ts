@@ -63,7 +63,12 @@ ingestaRouter.post("/", limitadorIngesta, async (req, res) => {
   const { token: _token, ...mensaje } = parseo.data;
 
   try {
-    const promptSistema = await cargarPromptSistemaActivo(mensaje.empresaId, mensaje.texto);
+    const promptSistema = await cargarPromptSistemaActivo(
+      mensaje.empresaId,
+      mensaje.texto,
+      mensaje.canal,
+      mensaje.remitenteContacto
+    );
     const resultado = await procesarMensajeEntrante(mensaje, promptSistema);
     res.json(resultado);
   } catch (error) {
